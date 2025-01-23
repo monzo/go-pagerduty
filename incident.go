@@ -2,6 +2,7 @@ package pagerduty
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 
 	"github.com/google/go-querystring/query"
@@ -877,7 +878,7 @@ func (c *Client) RemoveIncidentNotificationSubscribersWithContext(ctx context.Co
 	return &result, nil
 }
 
-// UpdateIncident is not apart of the go-pagerduty library. Therefore, we need to add it manually.
+// UpdateIncident is not a part of the go-pagerduty library. Therefore, we need to add it manually.
 // https://developer.pagerduty.com/api-reference/8a0e1aa2ec666-update-an-incident
 
 // UpdateIncidentResponse is the response structure when calling the UpdateIncident API endpoint.
@@ -895,12 +896,19 @@ type UpdateIncidentOptions struct {
 }
 
 // UpdateIncident updates an existing incident.
+//
+// Deprecated: Use UpdateIncidentWithContext instead.
 func (c *Client) UpdateIncident(id string, from string, o UpdateIncidentOptions) (*UpdateIncidentResponse, error) {
+	return c.UpdateIncidentWithContext(context.Background(), id, from, o)
+}
+
+// UpdateIncidentWithContext updates an existing incident.
+func (c *Client) UpdateIncidentWithContext(ctx context.Context, id string, from string, o UpdateIncidentOptions) (*UpdateIncidentResponse, error) {
 	data := make(map[string]UpdateIncidentOptions)
 	data["incident"] = o
 	headers := make(map[string]string)
 	headers["From"] = from
-	resp, err := c.put("/incidents/"+id, data, &headers)
+	resp, err := c.put(ctx, "/incidents/"+id, data, headers)
 	if err != nil {
 		return nil, err
 	}
